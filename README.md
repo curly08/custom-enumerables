@@ -1,0 +1,1 @@
+This project consists of my recreation of various enumerable methods.
