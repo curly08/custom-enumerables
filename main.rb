@@ -5,7 +5,7 @@ module Enumerable
     for elem in self
       yield elem
     end
-    self
+    # self
   end
 
   def my_each_with_index
@@ -25,27 +25,30 @@ module Enumerable
     case self
     when Array
       result = Array.new
-      self.my_each do |elem|
-        result.push(elem) if yield(elem)
-      end
+      self.my_each { |elem| result.push(elem) if yield(elem) }
     when Hash
       result = Hash.new
-      self.my_each do |elem|
-        result[elem[0]] = elem[1] if yield(elem)
-      end
+      self.my_each { |elem| result[elem[0]] = elem[1] if yield(elem) }
     end
     result
+  end
+
+  def my_all?
+    return to_enum(:my_all?) unless block_given?
+
+    self.my_each { |elem| return false if yield(elem) == false }
+    true
   end
 end
 
 include Enumerable
 
 puts "Arrays: my_each vs. each"
-numbers = [1, 2, 3, 4, 5]
-p numbers.my_select  { |num| num.odd? }
-p numbers.select { |num| num.odd? }
+numbers = %w[ant bee cat]
+p numbers.my_all?  { |word| word.length < 3 }
+p numbers.all? { |word| word.length >= 4 }
 
 puts "\nHashes: my_each vs. each"
-fruit = {a: 5, b: 6, c: 3}
-p fruit.my_select { |k, v| v == 'cookies' }
-p fruit.select { |k, v| v == 'cookies' }
+fruit = {a: 'apple', b: 'apple', c: 'apple'}
+p fruit.my_all? { |k, v| v == 'apple' }
+p fruit.all? { |k, v| v.length == 1 }
