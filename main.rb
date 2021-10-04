@@ -5,7 +5,6 @@ module Enumerable
     for elem in self
       yield elem
     end
-    # self
   end
 
   def my_each_with_index
@@ -16,7 +15,6 @@ module Enumerable
       yield elem, i
       i += 1
     end
-    self
   end
 
   def my_select
@@ -33,22 +31,37 @@ module Enumerable
     result
   end
 
-  def my_all?
-    return to_enum(:my_all?) unless block_given?
-
-    self.my_each { |elem| return false if yield(elem) == false }
+  def my_all?(*arg)
+    if block_given?
+      self.my_each { |elem| return false unless yield(elem) == true }
+    elsif !arg.empty?
+      self.my_each { |elem| return false unless arg[0] === elem }
+    else
+      self.my_each { |elem| return false if elem == false || elem == nil}
+    end
     true
+  end
+
+  def my_any?(*arg)
+    if block_given?
+      self.my_each { |elem| return true if yield(elem) == true }
+    elsif !arg.empty?
+      self.my_each { |elem| return true if arg[0] === elem }
+    else
+      self.my_each { |elem| return true if elem == true }
+    end
+    false
   end
 end
 
 include Enumerable
 
 puts "Arrays: my_each vs. each"
-numbers = %w[ant bee cat]
-p numbers.my_all?  { |word| word.length < 3 }
-p numbers.all? { |word| word.length >= 4 }
+numbers = [false, nil]
+p numbers.my_any?
+p numbers.any?
 
 puts "\nHashes: my_each vs. each"
-fruit = {a: 'apple', b: 'apple', c: 'apple'}
-p fruit.my_all? { |k, v| v == 'apple' }
-p fruit.all? { |k, v| v.length == 1 }
+fruit = {a: 'apple', b: 'pear', c: 'apple'}
+p fruit.my_any? { |k, v| v.length < 4 }
+p fruit.any? { |k, v| v == 'app' }
