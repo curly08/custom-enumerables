@@ -2,8 +2,8 @@ module Enumerable
   def my_each
     return to_enum(:my_each) unless block_given?
 
-    for k, v in self
-      yield k, v
+    for elem in self
+      yield elem
     end
     self
   end
@@ -11,17 +11,10 @@ module Enumerable
   def my_each_with_index
     return to_enum(:my_each_with_index) unless block_given?
 
-    case self
-    when Array
-      for i in 0..self.size-1 do
-        yield self[i], i
-      end
-    when Hash
-      i = 0
-      for v in self
-        yield v, i
-        i += 1
-      end
+    i = 0
+    self.my_each do |elem|
+      yield elem, i
+      i += 1
     end
     self
   end
@@ -36,5 +29,5 @@ p numbers.each_with_index  { |item, index| puts item }
 
 puts "Hashes: my_each vs. each"
 fruit = {a: 'apples', b: 'bananas', c: 'cookies'}
-p fruit.my_each_with_index  { |(k,v), i| puts "#{i}: #{k} => #{v}" }
-p fruit.each_with_index  { |(k,v), i| puts "#{i}: #{k} => #{v}" }
+p fruit.my_each_with_index { |k, i| puts "Index: #{i},#{k} => " }
+p fruit.each_with_index { |k, i| puts "Index: #{i},#{k} => " }
