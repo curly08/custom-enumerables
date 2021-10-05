@@ -36,6 +36,7 @@ module Enumerable
       self.my_each { |elem| return false unless yield(elem) == true }
     elsif !arg.empty?
       raise ArgumentError unless arg.count == 1
+
       self.my_each { |elem| return false unless arg[0] === elem }
     else
       self.my_each { |elem| return false if elem == false || elem == nil}
@@ -48,6 +49,7 @@ module Enumerable
       self.my_each { |elem| return true if yield(elem) == true }
     elsif !arg.empty?
       raise ArgumentError unless arg.count == 1
+
       self.my_each { |elem| return true if arg[0] === elem }
     else
       self.my_each { |elem| return true if elem == true }
@@ -60,6 +62,7 @@ module Enumerable
       self.my_each { |elem| return false if yield(elem) == true }
     elsif !arg.empty?
       raise ArgumentError unless arg.count == 1
+
       self.my_each { |elem| return false if arg[0] === elem }
     else
       self.my_each { |elem| return false if elem == true }
@@ -73,6 +76,7 @@ module Enumerable
       self.my_each { |elem| i += 1 if yield(elem) == true }
     elsif !arg.empty?
       raise ArgumentError unless arg.count == 1
+
       i = 0
       self.my_each { |elem| i += 1 if arg[0] === elem }
     else
@@ -80,16 +84,24 @@ module Enumerable
     end
     i
   end
+
+  def my_map
+    return to_enum(:my_map) unless block_given?
+
+    result = Array.new
+    self.my_each { |elem| result.push(yield(elem)) }
+    result
+  end
 end
 
 include Enumerable
 
 puts "Arrays: my_each vs. each"
-numbers = %w[bear cat dog apple]
-p numbers.my_count('cat')
-p numbers.count('cat')
+numbers = [3, 2, 4, 1]
+p numbers.my_map { |w| w * w}
+p numbers.map { |w| w * w}
 
 puts "\nHashes: my_each vs. each"
 fruit = {a: 'apple', b: 'pear', c: 'apple'}
-p fruit.my_count([:a, 'apple'])
-p fruit.count([:a, 'apple'])
+p fruit.my_select { |k, v| v if v.length == 5 }
+p fruit.select { |k, v| v if v.length == 5 }
