@@ -72,7 +72,6 @@ module Enumerable
 
   def my_count(*arg)
     i = 0
-
     if block_given?
       self.my_each { |elem| i += 1 if yield(elem) == true }
     elsif !arg.empty?
@@ -82,7 +81,6 @@ module Enumerable
     else
       i = self.size
     end
-
     i
   end
 
