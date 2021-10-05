@@ -1,3 +1,5 @@
+require 'pry-byebug'
+
 module Enumerable
   def my_each
     return to_enum(:my_each) unless block_given?
@@ -71,17 +73,18 @@ module Enumerable
   end
 
   def my_count(*arg)
+    i = 0
+
     if block_given?
-      i = 0
       self.my_each { |elem| i += 1 if yield(elem) == true }
     elsif !arg.empty?
       raise ArgumentError unless arg.count == 1
 
-      i = 0
       self.my_each { |elem| i += 1 if arg[0] === elem }
     else
       i = self.size
     end
+
     i
   end
 
@@ -92,16 +95,52 @@ module Enumerable
     self.my_each { |elem| result.push(yield(elem)) }
     result
   end
+
+  def my_inject(*arg)
+    if arg.empty?
+      raise LocalJumpError unless block_given?
+
+      memo = self.first
+      self[1..-1].my_each { |elem| memo = yield memo, elem }
+    elsif arg.count == 1
+      if block_given?
+        raise NoMethodError unless arg[0].is_a?(Integer) || arg[0].is_a?(Float)
+
+        memo = arg[0]
+        self.my_each { |elem| memo = yield memo, elem }
+      else
+        raise Error unless arg[0].is_a?(Symbol)
+
+        memo = self.first
+        self[1..-1].my_each { |num| memo = memo.send arg[0], num }
+      end
+    elsif arg.count == 2
+      raise ArgumentError if block_given?
+      raise NoMethodError unless arg[0].is_a?(Integer) || arg[0].is_a?(Float) && arg[1].respond_to?(id2name)
+      
+      memo = arg[0]
+      self.my_each { |num| memo = memo.send arg[1], num }
+    elsif arg.count > 2
+      raise ArgumentError
+    end
+    memo
+  end
 end
 
 include Enumerable
 
 puts "Arrays: my_each vs. each"
-numbers = [3, 2, 4, 1]
-p numbers.my_map { |w| w * w}
-p numbers.map { |w| w * w}
+numbers = %w{ cat sheep bear }
+longest = %w{ cat sheep bear }.my_inject do |memo, word|
+  memo.length > word.length ? memo : word
+end
+p longest
+longest = %w{ cat sheep bear }.inject do |memo, word|
+  memo.length > word.length ? memo : word
+end
+p longest
 
 puts "\nHashes: my_each vs. each"
-fruit = {a: 'apple', b: 'pear', c: 'apple'}
-p fruit.my_select { |k, v| v if v.length == 5 }
-p fruit.select { |k, v| v if v.length == 5 }
+fruit = {a: 'pear', b: 'aple', c: 'dog'}
+p fruit.my_inject(0) {|memo, (key, val)| memo += val}
+p fruit.inject(0) {|memo, (key, val)| memo += val}
