@@ -52,16 +52,27 @@ module Enumerable
     end
     false
   end
+
+  def my_none?(*arg)
+    if block_given?
+      self.my_each { |elem| return false if yield(elem) == true }
+    elsif !arg.empty?
+      self.my_each { |elem| return false if arg[0] === elem }
+    else
+      self.my_each { |elem| return false if elem == true }
+    end
+    true
+  end
 end
 
 include Enumerable
 
 puts "Arrays: my_each vs. each"
-numbers = [false, nil]
-p numbers.my_any?
-p numbers.any?
+numbers = [ 2, 3]
+p numbers.my_none? {|num| num > 2 }
+p numbers.none? {|num| num > 2 }
 
 puts "\nHashes: my_each vs. each"
 fruit = {a: 'apple', b: 'pear', c: 'apple'}
-p fruit.my_any? { |k, v| v.length < 4 }
-p fruit.any? { |k, v| v == 'app' }
+p fruit.my_none? { |k, v| v.length == 6 }
+p fruit.none? { |k, v| v.length == 6 }
