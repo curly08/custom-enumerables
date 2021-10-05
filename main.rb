@@ -1,5 +1,3 @@
-require 'pry-byebug'
-
 module Enumerable
   def my_each
     return to_enum(:my_each) unless block_given?
@@ -88,11 +86,12 @@ module Enumerable
     i
   end
 
-  def my_map(&proc)
-    return to_enum(:my_map) unless block_given?
+  def my_map(*proc, &block)
+    return to_enum(:my_map) unless block_given? || (proc[0].is_a?(Proc) && proc.size == 1)
 
+    block = proc[0] if proc[0].is_a?(Proc) && proc.size == 1
     result = Array.new
-    self.my_each { |elem| result.push(proc.call(elem)) }
+    self.my_each { |elem| result.push(block.call(elem)) }
     result
   end
 
@@ -135,10 +134,12 @@ include Enumerable
 
 puts "Arrays: my_each vs. each"
 numbers = [2, 3, 1, 5]
-p numbers.my_map { |num| num * 3 }
+a_proc = Proc.new { |num| num * 3 }
+p numbers.my_map(a_proc) { |num| num * 3 }
 p numbers.map { |num| num * 3 }
 
 puts "\nHashes: my_each vs. each"
 fruit = {a: 4, b: 3, c: 8}
-p fruit.my_map { |key, val| val * 2 }
+b_proc = Proc.new { |key, val| val * 2 }
+p fruit.my_map(b_proc) { |key, val| val * 2 }
 p fruit.map { |key, val| val * 2 }
