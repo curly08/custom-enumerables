@@ -88,11 +88,11 @@ module Enumerable
     i
   end
 
-  def my_map
+  def my_map(&proc)
     return to_enum(:my_map) unless block_given?
 
     result = Array.new
-    self.my_each { |elem| result.push(yield(elem)) }
+    self.my_each { |elem| result.push(proc.call(elem)) }
     result
   end
 
@@ -134,20 +134,11 @@ end
 include Enumerable
 
 puts "Arrays: my_each vs. each"
-numbers = %w{ cat sheep bear }
-longest = %w{ cat sheep bear }.my_inject do |memo, word|
-  memo.length > word.length ? memo : word
-end
-p longest
-longest = %w{ cat sheep bear }.inject do |memo, word|
-  memo.length > word.length ? memo : word
-end
-p longest
+numbers = [2, 3, 1, 5]
+p numbers.my_map { |num| num * 3 }
+p numbers.map { |num| num * 3 }
 
 puts "\nHashes: my_each vs. each"
 fruit = {a: 4, b: 3, c: 8}
-p fruit.my_inject(0) {|memo, (key, val)| memo += val}
-p fruit.inject(0) {|memo, (key, val)| memo += val}
-
-puts "\nTesting multiply_els"
-p multiply_els([7,4,2,3,5])
+p fruit.my_map { |key, val| val * 2 }
+p fruit.map { |key, val| val * 2 }
