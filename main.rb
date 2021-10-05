@@ -125,6 +125,10 @@ module Enumerable
     end
     memo
   end
+
+  def multiply_els(arr)
+    arr.my_inject(:*)
+  end
 end
 
 include Enumerable
@@ -141,6 +145,9 @@ end
 p longest
 
 puts "\nHashes: my_each vs. each"
-fruit = {a: 'pear', b: 'aple', c: 'dog'}
+fruit = {a: 4, b: 3, c: 8}
 p fruit.my_inject(0) {|memo, (key, val)| memo += val}
 p fruit.inject(0) {|memo, (key, val)| memo += val}
+
+puts "\nTesting multiply_els"
+p multiply_els([7,4,2,3,5])
