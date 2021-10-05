@@ -35,6 +35,7 @@ module Enumerable
     if block_given?
       self.my_each { |elem| return false unless yield(elem) == true }
     elsif !arg.empty?
+      raise ArgumentError unless arg.count == 1
       self.my_each { |elem| return false unless arg[0] === elem }
     else
       self.my_each { |elem| return false if elem == false || elem == nil}
@@ -46,6 +47,7 @@ module Enumerable
     if block_given?
       self.my_each { |elem| return true if yield(elem) == true }
     elsif !arg.empty?
+      raise ArgumentError unless arg.count == 1
       self.my_each { |elem| return true if arg[0] === elem }
     else
       self.my_each { |elem| return true if elem == true }
@@ -57,22 +59,37 @@ module Enumerable
     if block_given?
       self.my_each { |elem| return false if yield(elem) == true }
     elsif !arg.empty?
+      raise ArgumentError unless arg.count == 1
       self.my_each { |elem| return false if arg[0] === elem }
     else
       self.my_each { |elem| return false if elem == true }
     end
     true
   end
+
+  def my_count(*arg)
+    if block_given?
+      i = 0
+      self.my_each { |elem| i += 1 if yield(elem) == true }
+    elsif !arg.empty?
+      raise ArgumentError unless arg.count == 1
+      i = 0
+      self.my_each { |elem| i += 1 if arg[0] === elem }
+    else
+      i = self.size
+    end
+    i
+  end
 end
 
 include Enumerable
 
 puts "Arrays: my_each vs. each"
-numbers = [ 2, 3]
-p numbers.my_none? {|num| num > 2 }
-p numbers.none? {|num| num > 2 }
+numbers = %w[bear cat dog apple]
+p numbers.my_count('cat')
+p numbers.count('cat')
 
 puts "\nHashes: my_each vs. each"
 fruit = {a: 'apple', b: 'pear', c: 'apple'}
-p fruit.my_none? { |k, v| v.length == 6 }
-p fruit.none? { |k, v| v.length == 6 }
+p fruit.my_count([:a, 'apple'])
+p fruit.count([:a, 'apple'])
